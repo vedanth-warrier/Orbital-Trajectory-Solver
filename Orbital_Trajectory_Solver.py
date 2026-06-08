@@ -26,6 +26,8 @@ log_densities_interpolated = sp.interpolate.interp1d(
 def p(h):  # Function to return atmospheric density at a given altitude h
     if h-R_e > 1000000:  # If altitude is greater than 1000 km, we can assume the density is negligible
         return 0
+    if h-R_e < 0:
+        h = R_e
     return np.exp(log_densities_interpolated(h-R_e))  # Returning the interpolated density value at altitude h
 
 
