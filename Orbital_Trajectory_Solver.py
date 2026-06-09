@@ -2,6 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
 import pandas as pd
+import streamlit as st
+
+st.set_page_config(layout='wide', page_title="Launch Telemetry Dashboard")
+st.title("Launch Telemetry Dashboard")
 
 # Defining Universal Gravitational Constant
 G = 6.67430e-11  # m^3 kg^-1 s^-2
@@ -15,14 +19,14 @@ def g(h):  # Standard pure gravity in m/s^2
     return G * M_e / (h)**2
 
 # Defining Atmospheric Density as a function of altitude
-density = pd.read_csv('atm_density.csv')  # reading atmospheric density data from a CSV file
-altitudes = density['Altitude (m)'].values  # Altitude values in meters
-densities = density['Density (kg/m^3)'].values  # Corresponding density values in kg/m^3
-log_densities_interpolated = sp.interpolate.interp1d(
-    altitudes, 
-    np.log(densities), 
-    fill_value="extrapolate"
-    )  # Interpolating the log of densities for better accuracy
+@st.cache_data
+def load_atmosphere():
+    density = pd.read_csv('atm_density.csv')  
+    altitudes = density['Altitude (m)'].values  
+    densities = density['Density (kg/m^3)'].values  
+    return sp.interpolate.interp1d(altitudes, np.log(densities), fill_value="extrapolate")
+
+log_densities_interpolated = load_atmosphere()  # Interpolating the log of densities for better accuracy
 def p(h):  # Function to return atmospheric density at a given altitude h
     if h-R_e > 1000000:  # If altitude is greater than 1000 km, we can assume the density is negligible
         return 0
@@ -32,17 +36,34 @@ def p(h):  # Function to return atmospheric density at a given altitude h
 
 
 # Getting Vehicle Parameters
-m_d = float(input("Enter the dry mass of the vehicle in kg: "))
-m_f = float(input("Enter the fuel mass of the vehicle in kg: "))
-A = float(input("Enter the cross-sectional area of the vehicle in m^2: "))
-Cd = float(input("Enter the drag coefficient of the vehicle: "))
-I_sp = float(input("Enter the specific impulse of the vehicle in seconds: "))
-T = float(input("Enter the thrust of the vehicle in Newtons: "))
+# --- TOP CONTROL BAR (THE GUI INTERFACE) ---
+st.subheader("Vehicle Parameters")
+col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-# Initial Conditions
-t = float(input("Enter the desired length of the simulation in s: "))
-vert = float(input("Enter the desired length of initial pure vertical ascent in m: "))
-v_thetai = float(input("Enter the initial tangetial velocity in m/s: "))
+with col1:
+    m_d = st.number_input("Dry Mass (kg)", value=10000.0, step=500.0)
+with col2:
+    m_f = st.number_input("Fuel Mass (kg)", value=100000.0, step=1000.0)
+with col3:
+    A = st.number_input("Area (m^2)", value=12.0, step=1.0)
+with col4:
+    Cd = st.number_input("Drag Coeff", value=0.4, step=0.1)
+with col5:
+    I_sp = st.number_input("I_sp (s)", value=400.0, step=10.0)
+with col6:
+    T = st.number_input("Thrust (N)", value=3000000.0, step=50000.0)
+
+st.subheader("Initial & Environment Conditions")
+col7, col8, col9 = st.columns(3)
+
+with col7:
+    t_sim = st.number_input("Simulation Length (s)", value=3000.0, step=50.0)
+with col8:
+    vert = st.number_input("Vertical Ascent Threshold (m)", value=15000.0, step=500.0)
+with col9:
+    v_thetai = st.number_input("Initial Tangential Vel (m/s)", value=386.7, step=10.0)
+
+st.divider() # Adds a clean horizontal line to separate controls from the dashboard
 theta = 0
 v_ri = 0   # Assuming initial velocity in normal-direction is zero
 r_i = R_e  # Assuming initial position in normal-direction is the Earth's surface
@@ -88,18 +109,16 @@ ground_impact.direction = -1
 # Now we can use scipy to solve the differential equation and give all the state_vectors for the first t seconds
 solution = sp.integrate.solve_ivp(
     vehicle_dynamics, 
-    (0,t), 
+    (0,t_sim), 
     state_i, 
-    t_eval = np.linspace(0,t,int(t)*50),
+    t_eval = np.linspace(0,t_sim,int(t_sim)*50),
     events = ground_impact
     )
 
 # Now to plot the trajectory
-print("Integration successful?", solution.success)
-
 # Initialize a wider figure for better subplot spacing
-plt.figure(figsize=(16, 6))
-plt.suptitle("Launch Telemetry Dashboard", fontsize=16, fontweight='bold')
+fig = plt.figure(figsize=(16, 6))
+fig.suptitle("Launch Telemetry Dashboard", fontsize=16, fontweight='bold')
 
 # Plot 1: Spatial Trajectory (True Physical Scale)
 ax1 = plt.subplot(1, 3, 1, projection='polar')
@@ -128,5 +147,5 @@ ax3.set_ylabel("Tangential Velocity (m/s)", fontweight='bold')
 ax3.set_title("Velocity Profile")
 ax3.grid(True, linestyle='--', alpha=0.7)
 
-plt.tight_layout()
-plt.show()
+fig.tight_layout()
+st.pyplot(fig)
