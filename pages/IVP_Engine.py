@@ -7,6 +7,12 @@ import streamlit as st
 st.set_page_config(layout='wide', page_title="Launch Telemetry Dashboard")
 st.title("Launch Telemetry Dashboard")
 
+st.markdown("""
+Welcome to the Launch Telemetry Dashboard. 
+
+This page is designed for if you know all the variables of your vehicle, and to see how it will fly!
+""")
+
 # Defining Universal Gravitational Constant
 G = 6.67430e-11  # m^3 kg^-1 s^-2
 
@@ -37,33 +43,23 @@ def p(h):  # Function to return atmospheric density at a given altitude h
 
 # Getting Vehicle Parameters
 # --- TOP CONTROL BAR (THE GUI INTERFACE) ---
-st.subheader("Vehicle Parameters")
-col1, col2, col3, col4, col5, col6 = st.columns(6)
+col_inputs, col_plot = st.columns([1, 2])
 
-with col1:
+with col_inputs:
+    st.subheader("Vehicle Parameters")
     m_d = st.number_input("Dry Mass (kg)", value=10000.0, step=500.0)
-with col2:
     m_f = st.number_input("Fuel Mass (kg)", value=100000.0, step=1000.0)
-with col3:
-    A = st.number_input("Area (m^2)", value=12.0, step=1.0)
-with col4:
+    A = st.number_input("Cross Sectional Area (m^2)", value=12.0, step=1.0)
     Cd = st.number_input("Drag Coeff", value=0.4, step=0.1)
-with col5:
     I_sp = st.number_input("I_sp (s)", value=400.0, step=10.0)
-with col6:
     T = st.number_input("Thrust (N)", value=3000000.0, step=50000.0)
 
-st.subheader("Initial & Environment Conditions")
-col7, col8, col9 = st.columns(3)
-
-with col7:
+    st.subheader("Initial & Environment Conditions")
     t_sim = st.number_input("Simulation Length (s)", value=3000.0, step=50.0)
-with col8:
     vert = st.number_input("Vertical Ascent Threshold (m)", value=15000.0, step=500.0)
-with col9:
     v_thetai = st.number_input("Initial Tangential Vel (m/s)", value=386.7, step=10.0)
 
-st.divider() # Adds a clean horizontal line to separate controls from the dashboard
+
 theta = 0
 v_ri = 0   # Assuming initial velocity in normal-direction is zero
 r_i = R_e  # Assuming initial position in normal-direction is the Earth's surface
@@ -121,31 +117,39 @@ fig = plt.figure(figsize=(16, 6))
 fig.suptitle("Launch Telemetry Dashboard", fontsize=16, fontweight='bold')
 
 # Plot 1: Spatial Trajectory (True Physical Scale)
-ax1 = plt.subplot(1, 3, 1, projection='polar')
-ax1.plot(solution.y[1], solution.y[0], color='crimson', linewidth=2, label="Trajectory")
-theta_earth = np.linspace(0, 2*np.pi, 100)
-ax1.fill(theta_earth, np.full(100, R_e), color='dodgerblue', alpha=0.3, label="Earth")
-ax1.set_ylim(0, np.max(solution.y[0]) * 1.05) 
-ax1.set_title("Spatial Path (True Scale)", pad=15)
-ax1.grid(True, linestyle='--', alpha=0.7)
-ax1.set_yticklabels([]) 
-ax1.legend(loc="lower left", fontsize='small')
+with col_plot:
+    fig = plt.figure(figsize=(9, 9))
+    gs = fig.add_gridspec(2, 2, height_ratios=[2, 1])
 
-# Plot 2: Telemetry - Altitude vs Time
-ax2 = plt.subplot(1, 3, 2)
-ax2.plot(solution.t, solution.y[0]-R_e, color='darkorange', linewidth=2)
-ax2.set_xlabel("Time (s)", fontweight='bold')
-ax2.set_ylabel("Altitude (m)", fontweight='bold')
-ax2.set_title("Altitude Profile")
-ax2.grid(True, linestyle='--', alpha=0.7)
+    # Top Plot: Spatial Trajectory
+    ax1 = fig.add_subplot(gs[0, :], projection='polar')
+    ax1.plot(solution.y[1], solution.y[0], color='crimson', linewidth=2, label="Trajectory")
+    theta_earth = np.linspace(0, 2*np.pi, 100)
+    ax1.set_rlabel_position(225)  
+    ax1.tick_params(axis='y', labelsize=8, colors='gray')
+    ax1.fill(theta_earth, np.full(100, R_e), color='dodgerblue', alpha=0.3, label="Earth")
+    ax1.set_ylim(0, np.max(solution.y[0]) * 1.05) 
+    ax1.set_title("Spatial Path (True Scale)", pad=15)
+    ax1.grid(True, linestyle='--', alpha=0.7)
+    ax1.legend(loc="lower left", fontsize='small')
 
-# Plot 3: Telemetry - Tangential Velocity vs Time
-ax3 = plt.subplot(1, 3, 3)
-ax3.plot(solution.t, solution.y[3], color='forestgreen', linewidth=2)
-ax3.set_xlabel("Time (s)", fontweight='bold')
-ax3.set_ylabel("Tangential Velocity (m/s)", fontweight='bold')
-ax3.set_title("Velocity Profile")
-ax3.grid(True, linestyle='--', alpha=0.7)
+    # Bottom Left Plot: Altitude Profile
+    ax2 = fig.add_subplot(gs[1, 0])
+    ax2.plot(solution.t, solution.y[0]-R_e, color='darkorange', linewidth=2)
+    ax2.set_xlabel("Time (s)", fontweight='bold')
+    ax2.set_ylabel("Altitude (m)", fontweight='bold')
+    ax2.set_title("Altitude Profile")
+    ax2.grid(True, linestyle='--', alpha=0.7)
 
-fig.tight_layout()
-st.pyplot(fig)
+    # Bottom Right Plot: Velocity Profile
+    ax3 = fig.add_subplot(gs[1, 1])
+    ax3.plot(solution.t, solution.y[3], color='forestgreen', linewidth=2)
+    ax3.set_xlabel("Time (s)", fontweight='bold')
+    ax3.set_ylabel("Tangential Velocity (m/s)", fontweight='bold')
+    ax3.set_title("Velocity Profile")
+    ax3.grid(True, linestyle='--', alpha=0.7)
+
+    fig.tight_layout()
+    st.pyplot(fig)
+
+st.divider()

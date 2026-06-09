@@ -28,10 +28,10 @@ with col1:
     st.page_link("pages/IVP_Engine.py", label="Launch IVP Engine", icon="☄️")
 
 with col2:
-    st.subheader("Phase 2: BVP Optimizer")
+    st.subheader("Phase 2: BVP Optimiser")
     st.write("Calculate explicit pitch profiles to mathematically target specific orbital insertion boundaries.")
     # This button redirects to your new Phase 2 script
-    st.page_link("pages/BVP_Optimiser.py", label="Launch BVP Optimizer", icon="🎯")
+    st.page_link("pages/BVP_Optimiser.py", label="Launch BVP Optimiser", icon="🎯")
 
 st.divider()
 
