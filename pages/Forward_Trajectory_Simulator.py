@@ -55,9 +55,40 @@ div[data-baseweb="input"]:focus-within {
 div[data-testid="stVerticalBlock"] > div:has(div[data-testid="element-container"]) {
     /* background: rgba(26, 32, 44, 0.2); */
 }
+
+/* Hide Streamlit Sidebar completely */
+[data-testid="stSidebar"] {
+    display: none !important;
+}
+[data-testid="collapsedControl"] {
+    display: none !important;
+}
+
+/* Page link back button styling */
+div[data-testid="stPageLink"] a {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 8px !important;
+    padding: 0.4rem 0.85rem !important;
+    color: #A0AEC0 !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+    display: inline-flex !important;
+    width: auto !important;
+    margin-bottom: 1.5rem !important;
+}
+div[data-testid="stPageLink"] a:hover {
+    border-color: #FF4B4B !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 10px rgba(255, 75, 75, 0.15) !important;
+    transform: translateX(-3px) !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
+st.page_link("Orbital_Trajectory_Solver.py", label="Back to Dashboard", icon="🏠")
 st.markdown('<div class="page-title">☄️ Forward Trajectory Simulator (IVP)</div>', unsafe_allow_html=True)
 st.markdown('<div class="page-subtitle">Simulate rocket flight path parameters in real time. Input your vehicle details to calculate and plot the 2D gravity turn profile, dynamic drag, and velocity updates.</div>', unsafe_allow_html=True)
 
@@ -106,11 +137,11 @@ with col_inputs:
     t_sim = st.number_input("Simulation Length (s)", value=3000.0, step=50.0)
     vert = st.number_input("Vertical Ascent Threshold (m)", value=15000.0, step=500.0)
     v_thetai = st.number_input("Initial Tangential Vel (m/s)", value=386.7, step=10.0)
+    r_i = st.number_input("Starting Altitude (km)", value=0.0, step=100.0)*1000 + R_e
 
 
 theta = 0
 v_ri = 0   # Assuming initial velocity in normal-direction is zero
-r_i = R_e  # Assuming initial position in normal-direction is the Earth's surface
 
 # Creating Initial State Vector
 state_i = np.array([r_i, theta, v_ri, v_thetai, m_d + m_f])  # Initial state vector [x, y, v_x, v_y, mass]

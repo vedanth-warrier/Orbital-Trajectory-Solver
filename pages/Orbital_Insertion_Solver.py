@@ -73,9 +73,40 @@ div[data-testid="stButton"] button:hover {
 div[data-testid="stButton"] button:active {
     transform: translateY(0) !important;
 }
+
+/* Hide Streamlit Sidebar completely */
+[data-testid="stSidebar"] {
+    display: none !important;
+}
+[data-testid="collapsedControl"] {
+    display: none !important;
+}
+
+/* Page link back button styling */
+div[data-testid="stPageLink"] a {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 8px !important;
+    padding: 0.4rem 0.85rem !important;
+    color: #A0AEC0 !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+    display: inline-flex !important;
+    width: auto !important;
+    margin-bottom: 1.5rem !important;
+}
+div[data-testid="stPageLink"] a:hover {
+    border-color: #FF4B4B !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 10px rgba(255, 75, 75, 0.15) !important;
+    transform: translateX(-3px) !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
+st.page_link("Orbital_Trajectory_Solver.py", label="Back to Dashboard", icon="🏠")
 st.markdown('<div class="page-title">🎯 Orbital Insertion Solver (BVP)</div>', unsafe_allow_html=True)
 st.markdown('<div class="page-subtitle">Resolve orbital boundary-value problems (BVP) using a fast gradient-based numerical solver. Input your environmental parameters, leave exactly three solvable inputs blank, and execute the solver to target your desired stable parking orbit.</div>', unsafe_allow_html=True)
 

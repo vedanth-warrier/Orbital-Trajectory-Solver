@@ -119,6 +119,14 @@ div[data-testid="stPageLink"] a:hover {
     font-size: 0.95rem;
     margin-top: 4rem;
 }
+
+/* Hide Streamlit Sidebar completely */
+[data-testid="stSidebar"] {
+    display: none !important;
+}
+[data-testid="collapsedControl"] {
+    display: none !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
