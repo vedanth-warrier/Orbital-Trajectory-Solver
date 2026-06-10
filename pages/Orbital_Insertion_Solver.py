@@ -4,16 +4,80 @@ import scipy as sp
 import pandas as pd
 import streamlit as st
 
-st.set_page_config(layout="wide", page_title="BVP Optimiser")
-st.title("Orbital Insertion Dashboard")
+st.set_page_config(layout="wide", page_title="Orbital Insertion Solver (BVP)")
 
+# Premium Style Injection
 st.markdown("""
-Welcome to the Orbital Insertion Dashboard. 
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
-This page is designed for you to figure out what you need to get your vehicle to your desired orbit!
-When entering the solvable inputs below, you must leave 3 degrees of freedom (3 variables blank), and the
-optimiser will calculate those values for you!
-""")
+/* Global Font & Theme overrides */
+html, body, [class*="css"], .stMarkdown {
+    font-family: 'Outfit', sans-serif !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 700 !important;
+}
+
+/* Custom glowing titles */
+.page-title {
+    font-size: 3rem !important;
+    font-weight: 800 !important;
+    background: linear-gradient(90deg, #FF4B4B, #FF8A00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem !important;
+    letter-spacing: -0.5px;
+    padding-top: 1rem;
+}
+
+.page-subtitle {
+    font-size: 1.15rem;
+    color: #A0AEC0;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* Input boxes premium borders */
+div[data-baseweb="input"] {
+    background-color: #1E2530 !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    transition: all 0.3s ease;
+}
+div[data-baseweb="input"]:focus-within {
+    border-color: #FF4B4B !important;
+    box-shadow: 0 0 0 1px #FF4B4B !important;
+}
+
+/* Premium Button Overrides */
+div[data-testid="stButton"] button {
+    background: linear-gradient(90deg, #FF4B4B, #FF8A00) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    padding: 0.6rem 2rem !important;
+    width: 100% !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 12px rgba(255, 75, 75, 0.25) !important;
+}
+
+div[data-testid="stButton"] button:hover {
+    box-shadow: 0 6px 20px rgba(255, 75, 75, 0.45) !important;
+    transform: translateY(-2px) !important;
+}
+
+div[data-testid="stButton"] button:active {
+    transform: translateY(0) !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="page-title">🎯 Orbital Insertion Solver (BVP)</div>', unsafe_allow_html=True)
+st.markdown('<div class="page-subtitle">Resolve orbital boundary-value problems (BVP) using a fast gradient-based numerical solver. Input your environmental parameters, leave exactly three solvable inputs blank, and execute the solver to target your desired stable parking orbit.</div>', unsafe_allow_html=True)
 
 # Defining Universal Gravitational Constant
 G = 6.67430e-11  # m^3 kg^-1 s^-2
@@ -462,38 +526,50 @@ if is_valid and execute:
     st.rerun()
 
 with col_plot:
-    fig = plt.figure(figsize = (8.9,12))
-    gs = fig.add_gridspec(2,2, height_ratios=[2,1])
+    plt.style.use('dark_background')
+    fig = plt.figure(figsize=(9, 12))
+    fig.patch.set_facecolor('#0E1117') # Match Streamlit background
+    gs = fig.add_gridspec(2, 2, height_ratios=[2, 1])
     theta = np.linspace(0, 2*np.pi, 100)
     
-    ax1 = fig.add_subplot(gs[0,:], projection = 'polar')
-    ax1.plot(theta, np.full(100, R_e + orb_h), color='crimson', linewidth=2, label="Target Orbit")
-    ax1.fill(theta, np.full(100, R_e), color='dodgerblue', alpha=0.3, label="Earth")
+    # Polar plot: Trajectory / Orbit Profile
+    ax1 = fig.add_subplot(gs[0, :], projection='polar')
+    ax1.set_facecolor('#1E2530')
+    ax1.plot(theta, np.full(100, R_e + orb_h), color='#FF4B4B', linewidth=2, linestyle='--', label="Target Orbit")
+    ax1.fill(theta, np.full(100, R_e), color='#3182CE', alpha=0.25, label="Earth")
     ax1.set_rlabel_position(225)  
-    ax1.tick_params(axis='y', labelsize=8, colors='gray')
+    ax1.tick_params(axis='y', labelsize=8, colors='#718096')
+    ax1.tick_params(axis='x', colors='#A0AEC0')
     ax1.set_ylim(0, (R_e + orb_h) * 1.05)
-    ax1.set_title("Target Orbit Profile", pad=15)
-    ax1.grid(True, linestyle='--', alpha=0.7)
+    ax1.set_title("Orbital Path (True Scale)", pad=15, color='#FFFFFF', fontweight='bold', fontsize=12)
+    ax1.grid(True, linestyle='--', alpha=0.3, color='#4A5568')
 
-    ax2 = fig.add_subplot(gs[1,0])
-    ax2.set_xlabel("Time (s)", fontweight='bold')
-    ax2.set_ylabel("Altitude (m)", fontweight='bold')
-    ax2.set_title("Altitude Profile")
-    ax2.grid(True, linestyle='--', alpha=0.7)
+    # Subplot 2: Altitude Profile
+    ax2 = fig.add_subplot(gs[1, 0])
+    ax2.set_facecolor('#1E2530')
+    ax2.set_xlabel("Time (s)", fontweight='bold', color='#A0AEC0')
+    ax2.set_ylabel("Altitude (m)", fontweight='bold', color='#A0AEC0')
+    ax2.set_title("Altitude Profile", color='#FFFFFF', fontweight='bold')
+    ax2.grid(True, linestyle='--', alpha=0.3, color='#4A5568')
+    ax2.tick_params(colors='#718096')
 
-    ax3 = fig.add_subplot(gs[1,1])
-    ax3.set_xlabel("Time (s)", fontweight='bold')
-    ax3.set_ylabel("Tangential Velocity (m/s)", fontweight='bold')
-    ax3.set_title("Velocity Profile")
-    ax3.grid(True, linestyle='--', alpha=0.7)
+    # Subplot 3: Velocity Profile
+    ax3 = fig.add_subplot(gs[1, 1])
+    ax3.set_facecolor('#1E2530')
+    ax3.set_xlabel("Time (s)", fontweight='bold', color='#A0AEC0')
+    ax3.set_ylabel("Tangential Velocity (m/s)", fontweight='bold', color='#A0AEC0')
+    ax3.set_title("Velocity Profile", color='#FFFFFF', fontweight='bold')
+    ax3.grid(True, linestyle='--', alpha=0.3, color='#4A5568')
+    ax3.tick_params(colors='#718096')
 
     if 'plot_t' in st.session_state:
-        ax1.plot(st.session_state.plot_y[1], st.session_state.plot_y[0], color='darkgreen', label='Trajectory', linewidth=2)
+        ax1.plot(st.session_state.plot_y[1], st.session_state.plot_y[0], color='#48BB78', label='Simulated Trajectory', linewidth=2.5)
         ax1.set_ylim(0, max(max(st.session_state.plot_y[0]), (R_e + orb_h))*1.05)
-        ax2.plot(st.session_state.plot_t, st.session_state.plot_y[0]-R_e, color='darkorange', linewidth=2)
-        ax3.plot(st.session_state.plot_t, st.session_state.plot_y[3], color='forestgreen', linewidth=2)
+        ax2.plot(st.session_state.plot_t, st.session_state.plot_y[0]-R_e, color='#ED8936', linewidth=2)
+        ax3.plot(st.session_state.plot_t, st.session_state.plot_y[3], color='#48BB78', linewidth=2)
     
-    ax1.legend(loc="lower left", fontsize='small')
+    ax1.legend(loc="lower left", fontsize='small', facecolor='#1A202C', edgecolor=(1.0, 1.0, 1.0, 0.1))
+    fig.tight_layout()
     st.pyplot(fig)
 
 st.divider()
