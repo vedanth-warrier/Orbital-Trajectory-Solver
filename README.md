@@ -28,18 +28,23 @@ The physics engine accounts for:
 
 Numerically integrates the equations of motion for a launch vehicle 
 under known parameters using `scipy.integrate.solve_ivp` (RK45). 
-Outputs a real-time polar trajectory plot, altitude profile, and 
+Outputs a polar trajectory plot, altitude profile, and 
 tangential velocity profile.
 
-**Equations of motion (polar coordinates):**
-- dr/dt = v_r
-- dθ/dt = v_θ / r
-- dv_θ/dt = T_θ/m − (½ρC_dA/m)·v·v_θ − v_r·v_θ/r
-- dv_r/dt = T_r/m − (½ρC_dA/m)·v·v_r − g(r) + v_θ²/r
-- dm/dt = −T/(I_sp · g_0)
+## Equations of Motion (Polar Coordinates)
+
+$$\frac{dr}{dt} = v_r$$
+
+$$\frac{d\theta}{dt} = \frac{v_\theta}{r}$$
+
+$$\frac{dv_\theta}{dt} = \frac{T_\theta}{m} - \frac{1}{2}\frac{\rho C_d A}{m}v \cdot v_\theta - \frac{v_r v_\theta}{r}$$
+
+$$\frac{dv_r}{dt} = \frac{T_r}{m} - \frac{1}{2}\frac{\rho C_d A}{m}v \cdot v_r - g(r) + \frac{v_\theta^2}{r}$$
+
+$$\frac{dm}{dt} = -\frac{T}{I_{sp} \cdot g_0}$$
 
 **Inputs:** Dry mass, fuel mass, thrust, I_sp, drag coefficient, 
-cross-sectional area, vertical ascent threshold
+cross-sectional area, vertical ascent threshold, starting altitude
 
 ## Module 2: Orbital Insertion Solver (BVP)
 
@@ -48,7 +53,7 @@ cross-sectional area, vertical ascent threshold
 Solves the inverse problem: given a target circular orbit altitude, 
 find the vehicle parameters that achieve it. Formulated as a 
 3-degree-of-freedom boundary value problem and solved using 
-`scipy.optimize.least_squares` (Trust Region Reflective method).
+`scipy.optimize.least_squares`.
 
 **Three-phase mission architecture:**
 1. **Ascent burn** — gravity-turn powered climb to staging altitude
@@ -63,8 +68,8 @@ find the vehicle parameters that achieve it. Formulated as a
 **Solvable parameters (leave any 3 blank):**
 Dry mass, fuel mass, thrust, pitch-over angle, ascent fuel allocation
 
-**Solver:** `scipy.optimize.least_squares` with TRF method, 
-dynamic variable scaling, and physically-motivated initial guesses
+**Solver:** `scipy.optimize.least_squares` with dynamic variable
+scaling, and physically-motivated initial guesses
 
 ## Atmospheric Model
 
