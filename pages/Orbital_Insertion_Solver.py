@@ -224,7 +224,7 @@ with col_inputs:
     alloc_ui = st.number_input("Ascent Fuel Allocation (1 -> 99%)", value=None, step=5.0, min_value=1.0, max_value=99.0, key='alloc_key')
     alloc_perc = alloc_ui / 100.0 if alloc_ui is not None else None
     T = st.number_input("Thrust (N)", value=None, step=50000.0, min_value=0.01, max_value=999999999.0, key='t_key')
-    pitch = st.number_input("Pitch Over Angle (0 -> π/2)", value=None, step=0.1, min_value=0.001, max_value=np.pi/2, key='pitch_key')
+    pitch = st.number_input("Pitch Over Angle (0 -> π/2)", value=None, step=0.1, min_value=0.0, max_value=np.pi/2, key='pitch_key')
     
     # Calculate how many solvable parameters are left blank to check degrees of freedom
     blank_count = [m_d, m_f, T, pitch, alloc_ui].count(None)
@@ -331,7 +331,7 @@ def bvp_objective(guess):
     # --- PHASE 1: ASCENT BURN ---
     sol_1 = sp.integrate.solve_ivp(
         vehicle_dynamics, (0, 3600), state_i, 
-        rtol=1e-8, atol=1e-10,
+        rtol=1e-5, atol=1e-7,
         events=[ground_impact, mass_cutoff], args=(thrust, pitch, dry_m + mf_kick)
     )
     # Boundary check: Did the vehicle crash during ascent phase?
@@ -351,7 +351,7 @@ def bvp_objective(guess):
     state_2_initial = sol_1.y[:, -1]
     sol_2 = sp.integrate.solve_ivp(
         vehicle_dynamics, (sol_1.t[-1], sol_1.t[-1] + coast_time_limit), state_2_initial, 
-        rtol=1e-8, atol=1e-10,
+        rtol=1e-5, atol=1e-7,
         events=[ground_impact, apogee_reached], args=(0.0, 0.0, 0.0)
     )
     # Boundary check: Did the vehicle crash during coast phase?
@@ -370,7 +370,7 @@ def bvp_objective(guess):
     sol_3 = sp.integrate.solve_ivp(
         vehicle_dynamics, (sol_2.t[-1], sol_2.t[-1] + 3600), state_3_initial, 
         events=[ground_impact, mass_cutoff, target_velocity_reached], args=(thrust, 0.0, dry_m), 
-        rtol = 1e-10, atol = 1e-12
+        rtol=1e-5, atol=1e-7
     )
     # Boundary check: Did the vehicle crash during circularisation burn phase?
     if sol_3.y[0][-1] <= R_e + 10: 
