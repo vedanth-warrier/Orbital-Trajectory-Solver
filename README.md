@@ -24,7 +24,7 @@ The physics engine accounts for:
 
 ## Module 1: Forward Trajectory Simulator (IVP)
 
-<img src="images/ivp-simulator.png" width="80%">
+<img src="images/ivp_simulator.png" width="80%">
 
 Numerically integrates the equations of motion for a launch vehicle 
 under known parameters using `scipy.integrate.solve_ivp` (RK45). 
@@ -48,7 +48,7 @@ cross-sectional area, vertical ascent threshold, starting altitude
 
 ## Module 2: Orbital Insertion Solver (BVP)
 
-<img src="images/bvp-solver.png" width="80%">
+<img src="images/bvp_solver.png" width="80%">
 
 Solves the inverse problem: given a target circular orbit altitude, 
 find the vehicle parameters that achieve it. Formulated as a 
