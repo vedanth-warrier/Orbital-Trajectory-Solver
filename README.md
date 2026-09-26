@@ -56,9 +56,9 @@ find the vehicle parameters that achieve it. Formulated as a
 `scipy.optimize.least_squares`.
 
 **Three-phase mission architecture:**
-1. **Ascent burn** — gravity-turn powered climb to staging altitude
-2. **Coast to apogee** — ballistic trajectory with apogee detection event
-3. **Apogee kick** — circularisation burn to achieve target tangential velocity
+1. **Ascent burn**: gravity-turn powered climb to staging altitude
+2. **Coast to apogee**: ballistic trajectory with apogee detection event
+3. **Apogee kick**: circularisation burn to achieve target tangential velocity
 
 **Boundary conditions:**
 - Final altitude = target orbit altitude
